@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: skarbek
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_DB: skarbek
+    volumes:
+      - db-data:/var/lib/postgresql/data
+  backend:
+    build: ./backend
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://skarbek:changeme@db:5432/skarbek
+      - ADMIN_USER=admin
+      - ADMIN_PASSWORD=changeme
+      - JWT_SECRET=devsecret
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  db-data:

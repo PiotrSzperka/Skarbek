@@ -1,0 +1,52 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vite / build
+frontend/dist/
+frontend/.vite/
+dist/
+build/
+
+# Docker
+**/docker-compose.override.yml
+**/docker-compose.*.yml
+docker-compose.local.yml
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+env/
+
+# Logs
+*.log
+**/pip-install.log
+**/pytest-*.log
+test-results/
+
+# Editor directories
+/.vscode/
+/.idea/
+*.swp
+
+# Mac
+/.DS_Store
+
+# Playwright artifacts
+frontend/tests/playwright/test-results/
+# Playwright cache and reports
+.playwright/
+playwright-report/
+playwright/.cache/
+.playwright-cache/
+
+# General caches
+.cache/
+**/.cache/
+
+# frontend node_modules (redundant but explicit)
+frontend/node_modules/
