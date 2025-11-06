@@ -127,6 +127,8 @@ If `PROXMOX_ENV_FILE` is **not** set, the workflow expects these secrets instead
 | `DEPLOY_JWT_SECRET` | Required; JWT signing key |
 | `DEPLOY_BACKEND_IMAGE` | Optional override; defaults to `peterszp/skarbek-backend:latest` |
 | `DEPLOY_FRONTEND_IMAGE` | Optional override; defaults to `peterszp/skarbek-frontend:latest` |
+| `DEPLOY_BACKEND_HOST_PORT` | Optional; defaults to `8000` (host side of backend) |
+| `DEPLOY_FRONTEND_HOST_PORT` | Optional; defaults to `3000` (host side of frontend) |
 | `DEPLOY_POSTGRES_USER` | Optional; defaults to `skarbek` |
 | `DEPLOY_POSTGRES_DB` | Optional; defaults to `skarbek` |
 | `DEPLOY_ADMIN_USER` | Optional; defaults to `admin` |

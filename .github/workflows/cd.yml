@@ -56,6 +56,8 @@ jobs:
           PROXMOX_ENV_FILE: ${{ secrets.PROXMOX_ENV_FILE }}
           DEPLOY_BACKEND_IMAGE: ${{ secrets.DEPLOY_BACKEND_IMAGE }}
           DEPLOY_FRONTEND_IMAGE: ${{ secrets.DEPLOY_FRONTEND_IMAGE }}
+          DEPLOY_BACKEND_HOST_PORT: ${{ secrets.DEPLOY_BACKEND_HOST_PORT }}
+          DEPLOY_FRONTEND_HOST_PORT: ${{ secrets.DEPLOY_FRONTEND_HOST_PORT }}
           DEPLOY_POSTGRES_USER: ${{ secrets.DEPLOY_POSTGRES_USER }}
           DEPLOY_POSTGRES_PASSWORD: ${{ secrets.DEPLOY_POSTGRES_PASSWORD }}
           DEPLOY_POSTGRES_DB: ${{ secrets.DEPLOY_POSTGRES_DB }}
@@ -72,6 +74,8 @@ jobs:
 
           BACKEND_IMAGE="${DEPLOY_BACKEND_IMAGE:-peterszp/skarbek-backend:latest}"
           FRONTEND_IMAGE="${DEPLOY_FRONTEND_IMAGE:-peterszp/skarbek-frontend:latest}"
+          BACKEND_HOST_PORT="${DEPLOY_BACKEND_HOST_PORT:-8000}"
+          FRONTEND_HOST_PORT="${DEPLOY_FRONTEND_HOST_PORT:-3000}"
           POSTGRES_USER="${DEPLOY_POSTGRES_USER:-skarbek}"
           POSTGRES_DB="${DEPLOY_POSTGRES_DB:-skarbek}"
           ADMIN_USER="${DEPLOY_ADMIN_USER:-admin}"
@@ -79,6 +83,8 @@ jobs:
           {
             printf 'BACKEND_IMAGE=%s\n' "$BACKEND_IMAGE"
             printf 'FRONTEND_IMAGE=%s\n' "$FRONTEND_IMAGE"
+            printf 'BACKEND_HOST_PORT=%s\n' "$BACKEND_HOST_PORT"
+            printf 'FRONTEND_HOST_PORT=%s\n' "$FRONTEND_HOST_PORT"
             printf 'POSTGRES_USER=%s\n' "$POSTGRES_USER"
             printf 'POSTGRES_PASSWORD=%s\n' "$DEPLOY_POSTGRES_PASSWORD"
             printf 'POSTGRES_DB=%s\n' "$POSTGRES_DB"

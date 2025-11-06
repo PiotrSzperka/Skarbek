@@ -28,7 +28,7 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
     ports:
-      - "8000:8000"
+      - "${BACKEND_HOST_PORT:-8000}:8000"
 
   frontend:
     image: ${FRONTEND_IMAGE}
@@ -36,7 +36,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "3000:80"
+      - "${FRONTEND_HOST_PORT:-3000}:80"
 
 volumes:
   db-data:
