@@ -1,0 +1,100 @@
+name: Deploy to Proxmox
+
+on:
+  workflow_dispatch:
+    inputs:
+      pull_images:
+        description: "Run docker compose pull before restarting?"
+        type: boolean
+        default: true
+
+jobs:
+  deploy:
+    name: Deploy via Docker Compose
+    runs-on:
+      - self-hosted
+      - docker
+    environment: production
+    steps:
+      - name: Validate secrets
+        env:
+          PROXMOX_ENV_FILE: ${{ secrets.PROXMOX_ENV_FILE }}
+          DEPLOY_POSTGRES_PASSWORD: ${{ secrets.DEPLOY_POSTGRES_PASSWORD }}
+          DEPLOY_ADMIN_PASSWORD: ${{ secrets.DEPLOY_ADMIN_PASSWORD }}
+          DEPLOY_JWT_SECRET: ${{ secrets.DEPLOY_JWT_SECRET }}
+        run: |
+          if [ -n "$PROXMOX_ENV_FILE" ]; then
+            exit 0
+          fi
+
+          missing=0
+
+          if [ -z "$DEPLOY_POSTGRES_PASSWORD" ]; then
+            echo "Secret DEPLOY_POSTGRES_PASSWORD is required when PROXMOX_ENV_FILE is unset."
+            missing=1
+          fi
+
+          if [ -z "$DEPLOY_ADMIN_PASSWORD" ]; then
+            echo "Secret DEPLOY_ADMIN_PASSWORD is required when PROXMOX_ENV_FILE is unset."
+            missing=1
+          fi
+
+          if [ -z "$DEPLOY_JWT_SECRET" ]; then
+            echo "Secret DEPLOY_JWT_SECRET is required when PROXMOX_ENV_FILE is unset."
+            missing=1
+          fi
+
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build deployment .env file
+        env:
+          PROXMOX_ENV_FILE: ${{ secrets.PROXMOX_ENV_FILE }}
+          DEPLOY_BACKEND_IMAGE: ${{ secrets.DEPLOY_BACKEND_IMAGE }}
+          DEPLOY_FRONTEND_IMAGE: ${{ secrets.DEPLOY_FRONTEND_IMAGE }}
+          DEPLOY_POSTGRES_USER: ${{ secrets.DEPLOY_POSTGRES_USER }}
+          DEPLOY_POSTGRES_PASSWORD: ${{ secrets.DEPLOY_POSTGRES_PASSWORD }}
+          DEPLOY_POSTGRES_DB: ${{ secrets.DEPLOY_POSTGRES_DB }}
+          DEPLOY_ADMIN_USER: ${{ secrets.DEPLOY_ADMIN_USER }}
+          DEPLOY_ADMIN_PASSWORD: ${{ secrets.DEPLOY_ADMIN_PASSWORD }}
+          DEPLOY_JWT_SECRET: ${{ secrets.DEPLOY_JWT_SECRET }}
+        run: |
+          set -euo pipefail
+
+          if [ -n "$PROXMOX_ENV_FILE" ]; then
+            printf "%s" "$PROXMOX_ENV_FILE" > deploy/proxmox/.env
+            exit 0
+          fi
+
+          BACKEND_IMAGE="${DEPLOY_BACKEND_IMAGE:-peterszp/skarbek-backend:latest}"
+          FRONTEND_IMAGE="${DEPLOY_FRONTEND_IMAGE:-peterszp/skarbek-frontend:latest}"
+          POSTGRES_USER="${DEPLOY_POSTGRES_USER:-skarbek}"
+          POSTGRES_DB="${DEPLOY_POSTGRES_DB:-skarbek}"
+          ADMIN_USER="${DEPLOY_ADMIN_USER:-admin}"
+
+          {
+            printf 'BACKEND_IMAGE=%s\n' "$BACKEND_IMAGE"
+            printf 'FRONTEND_IMAGE=%s\n' "$FRONTEND_IMAGE"
+            printf 'POSTGRES_USER=%s\n' "$POSTGRES_USER"
+            printf 'POSTGRES_PASSWORD=%s\n' "$DEPLOY_POSTGRES_PASSWORD"
+            printf 'POSTGRES_DB=%s\n' "$POSTGRES_DB"
+            printf 'ADMIN_USER=%s\n' "$ADMIN_USER"
+            printf 'ADMIN_PASSWORD=%s\n' "$DEPLOY_ADMIN_PASSWORD"
+            printf 'JWT_SECRET=%s\n' "$DEPLOY_JWT_SECRET"
+          } > deploy/proxmox/.env
+
+      - name: Deploy stack
+        working-directory: deploy/proxmox
+        env:
+          PULL_IMAGES: ${{ github.event.inputs.pull_images }}
+        run: |
+          set -euo pipefail
+          if [ "${PULL_IMAGES}" = "true" ]; then
+            docker compose pull
+          fi
+          docker compose up -d
+          docker compose ps
