@@ -87,8 +87,7 @@ def test_parent_force_password_change_on_create():
     payload = {
         'name': 'Jan Kowalski',
         'email': 'jan@test.pl',
-        'pupil_id': 'P123',
-        'temporary_password': 'temp123'
+        'password': 'temp123'
     }
     r = client.post('/api/admin/parents', json=payload, headers=headers)
     assert r.status_code == 200
@@ -114,8 +113,7 @@ def test_parent_login_returns_require_password_change():
     payload = {
         'name': 'Anna Nowak',
         'email': 'anna@test.pl',
-        'pupil_id': 'P456',
-        'temporary_password': 'temp456'
+        'password': 'temp456'
     }
     client.post('/api/admin/parents', json=payload, headers=headers)
     
@@ -139,8 +137,7 @@ def test_parent_protected_endpoints_blocked_before_password_change():
     payload = {
         'name': 'Piotr Test',
         'email': 'piotr@test.pl',
-        'pupil_id': 'P789',
-        'temporary_password': 'temp789'
+        'password': 'temp789'
     }
     client.post('/api/admin/parents', json=payload, headers=headers)
     
@@ -174,8 +171,7 @@ def test_parent_change_password_initial_success():
     payload = {
         'name': 'Maria Test',
         'email': 'maria@test.pl',
-        'pupil_id': 'P999',
-        'temporary_password': 'temp999'
+        'password': 'temp999'
     }
     client.post('/api/admin/parents', json=payload, headers=headers)
     
@@ -215,8 +211,7 @@ def test_parent_change_password_validation():
     payload = {
         'name': 'Test Validation',
         'email': 'valid@test.pl',
-        'pupil_id': 'P111',
-        'temporary_password': 'temp111'
+        'password': 'temp111'
     }
     client.post('/api/admin/parents', json=payload, headers=headers)
     
@@ -251,8 +246,7 @@ def test_parent_login_after_password_change_no_requirement():
     payload = {
         'name': 'Final Test',
         'email': 'final@test.pl',
-        'pupil_id': 'P222',
-        'temporary_password': 'temp222'
+        'password': 'temp222'
     }
     client.post('/api/admin/parents', json=payload, headers=headers)
     
@@ -298,8 +292,7 @@ def test_parent_contributions_access_after_password_change():
     payload = {
         'name': 'Contrib Test',
         'email': 'contrib@test.pl',
-        'pupil_id': 'P333',
-        'temporary_password': 'temp333'
+        'password': 'temp333'
     }
     client.post('/api/admin/parents', json=payload, headers=headers)
     
