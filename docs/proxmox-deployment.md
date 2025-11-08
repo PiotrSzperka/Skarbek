@@ -140,9 +140,12 @@ If `PROXMOX_ENV_FILE` is **not** set, the workflow expects these secrets instead
 1. Make sure the self-hosted runner is online (see section 10 below).
 2. In GitHub, open **Actions → Deploy to Proxmox → Run workflow**.
 3. (Optional) clear the "Pull images" checkbox if you only want to restart the stack with images already present on the VM.
-4. Watch the job logs. The runner performs `docker compose pull` (when requested) and `docker compose up -d` from the checked-out repository.
+4. Watch the job logs. The runner performs:
+   - `docker compose pull` (when requested)
+   - `docker compose up -d` to deploy/restart containers
+   - `python run_migrations.py` inside the backend container to apply pending database migrations
 
-After the run finishes, check the VM (`docker compose ps`) to confirm the new containers are up.
+After the run finishes, check the VM (`docker compose ps`) to confirm the new containers are up. Database schema will be automatically updated to the latest version.
 
 ---
 This setup gives you an always-on deployment that mirrors what CI builds and pushes to Docker Hub. Let me know if you want to add HTTPS, monitoring, or automation (e.g., Ansible) on top of this base configuration.

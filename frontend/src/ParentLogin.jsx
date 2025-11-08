@@ -40,9 +40,17 @@ export default function ParentLogin({ onLogin }) {
     e.preventDefault()
     setStatus('Logowanie...')
     try {
-    const res = await api.parentLogin(email, password)
-    const token = res.token
-    setParentToken(token)
+      const res = await api.parentLogin(email, password)
+      const token = res.token
+      setParentToken(token)
+      
+      // Sprawdź czy wymagana zmiana hasła
+      if (res.require_password_change) {
+        setStatus('')
+        window.location.hash = '#/parent/change-password'
+        return
+      }
+      
       setStatus('')
       onLogin && onLogin()
     } catch (err) {
