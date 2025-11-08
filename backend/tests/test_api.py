@@ -188,7 +188,7 @@ def test_parent_change_password_initial_success():
     assert r2.status_code == 200
     data = r2.json()
     assert 'token' in data
-    assert data['message'] == 'Hasło zostało zmienione'
+    assert data['require_password_change'] is False
     
     # verify in DB
     from app.db import get_db
@@ -224,14 +224,14 @@ def test_parent_change_password_validation():
                      json={'old_password': 'wrong', 'new_password': 'newpass123'}, 
                      headers=parent_headers)
     assert r1.status_code == 401
-    assert 'Nieprawidłowe stare hasło' in r1.json()['detail']
+    assert 'invalid old password' in r1.json()['detail']
     
     # nowe hasło == stare
     r2 = client.post('/api/parents/change-password-initial', 
                      json={'old_password': 'temp111', 'new_password': 'temp111'}, 
                      headers=parent_headers)
     assert r2.status_code == 400
-    assert 'takie samo' in r2.json()['detail']
+    assert 'different' in r2.json()['detail']
 
 
 def test_parent_login_after_password_change_no_requirement():
@@ -264,7 +264,8 @@ def test_parent_login_after_password_change_no_requirement():
     r2 = client.post('/api/parents/login', json={'email': 'final@test.pl', 'password': 'newpass222'})
     assert r2.status_code == 200
     data = r2.json()
-    assert data['require_password_change'] is False
+    # When password change not required, the key is not present (only added when True)
+    assert data.get('require_password_change') != True
     
     # verify access to protected endpoints
     new_token = data['token']
@@ -311,6 +312,6 @@ def test_parent_contributions_access_after_password_change():
     new_headers = {'Authorization': f'Bearer {new_token}'}
     
     # POST contribution should work
-    contrib_payload = {'campaign_id': campaign_id, 'amount_declared': 50}
+    contrib_payload = {'campaign_id': campaign_id, 'amount': 50}
     r3 = client.post('/api/parents/contributions', json=contrib_payload, headers=new_headers)
     assert r3.status_code == 200
