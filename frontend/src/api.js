@@ -56,6 +56,12 @@ export const parentLogin = (email, password) => request('/parents/login', {
   body: JSON.stringify({ email, password }),
 })
 
+export const parentChangePasswordInitial = (oldPassword, newPassword, token) => request('/parents/change-password-initial', {
+  method: 'POST',
+  body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+  headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+})
+
 export const parentGetCampaigns = (token) => request('/parents/campaigns', {
   method: 'GET',
   headers: token ? { Authorization: `Bearer ${token}` } : undefined,

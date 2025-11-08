@@ -104,3 +104,15 @@ jobs:
           fi
           docker compose up -d
           docker compose ps
+
+      - name: Run database migrations
+        working-directory: deploy/proxmox
+        run: |
+          set -euo pipefail
+          echo "⏳ Waiting for backend container to be healthy..."
+          sleep 5
+          
+          echo "🚀 Running database migrations..."
+          docker compose exec -T backend python run_migrations.py
+          
+          echo "✅ Migrations completed successfully"

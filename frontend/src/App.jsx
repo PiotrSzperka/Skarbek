@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react'
 import Admin from './Admin'
 import ParentLogin from './ParentLogin'
 import ParentDashboard from './ParentDashboard'
+import ParentForcePasswordChange from './ParentForcePasswordChange'
 import * as api from './api'
 
 function parseHash() {
   const h = (window.location.hash || '#/').replace(/^#/, '')
   if (h.startsWith('/admin')) return 'admin'
   if (h.startsWith('/parent/login')) return 'parent_login'
+  if (h.startsWith('/parent/change-password')) return 'parent_change_password'
   if (h.startsWith('/parent/dashboard')) return 'parent_dashboard'
   return 'home'
 }
@@ -36,6 +38,10 @@ export default function App() {
 
   if (route === 'parent_login') {
     return <ParentLogin onLogin={() => navigate('/parent/dashboard')} />
+  }
+
+  if (route === 'parent_change_password') {
+    return <ParentForcePasswordChange />
   }
 
   if (route === 'parent_dashboard') {
