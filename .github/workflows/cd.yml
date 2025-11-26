@@ -69,6 +69,8 @@ jobs:
           GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
           GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
           GMAIL_SENDER_EMAIL: ${{ secrets.GMAIL_SENDER_EMAIL }}
+          PGADMIN_EMAIL: ${{ secrets.PGADMIN_EMAIL }}
+          PGADMIN_PASSWORD: ${{ secrets.PGADMIN_PASSWORD }}
         run: |
           set -euo pipefail
 
@@ -110,6 +112,12 @@ jobs:
             fi
             if [ -n "$GMAIL_SENDER_EMAIL" ]; then
               printf 'GMAIL_SENDER_EMAIL=%s\n' "$GMAIL_SENDER_EMAIL"
+            fi
+            if [ -n "$PGADMIN_EMAIL" ]; then
+              printf 'PGADMIN_EMAIL=%s\n' "$PGADMIN_EMAIL"
+            fi
+            if [ -n "$PGADMIN_PASSWORD" ]; then
+              printf 'PGADMIN_PASSWORD=%s\n' "$PGADMIN_PASSWORD"
             fi
           } > deploy/proxmox/.env
 

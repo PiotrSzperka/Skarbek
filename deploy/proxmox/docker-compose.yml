@@ -13,6 +13,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - internal
 
   backend:
     image: ${BACKEND_IMAGE}
@@ -27,6 +29,8 @@ services:
       JWT_SECRET: ${JWT_SECRET}
     ports:
       - "${BACKEND_HOST_PORT:-8000}:8000"
+    networks:
+      - internal
 
   frontend:
     image: ${FRONTEND_IMAGE}
@@ -35,6 +39,26 @@ services:
       - backend
     ports:
       - "${FRONTEND_HOST_PORT:-3000}:80"
+    networks:
+      - internal
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+      PGADMIN_LISTENING_PORT: 5050
+    ports:
+      - "5050:5050"
+    networks:
+      - internal
 
 volumes:
   db-data:
+
+networks:
+  internal:
