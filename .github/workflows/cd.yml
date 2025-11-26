@@ -64,6 +64,11 @@ jobs:
           DEPLOY_ADMIN_USER: ${{ secrets.DEPLOY_ADMIN_USER }}
           DEPLOY_ADMIN_PASSWORD: ${{ secrets.DEPLOY_ADMIN_PASSWORD }}
           DEPLOY_JWT_SECRET: ${{ secrets.DEPLOY_JWT_SECRET }}
+          FRONTEND_URL: ${{ vars.FRONTEND_URL }}
+          GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
+          GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+          GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
+          GMAIL_SENDER_EMAIL: ${{ secrets.GMAIL_SENDER_EMAIL }}
         run: |
           set -euo pipefail
 
@@ -91,6 +96,21 @@ jobs:
             printf 'ADMIN_USER=%s\n' "$ADMIN_USER"
             printf 'ADMIN_PASSWORD=%s\n' "$DEPLOY_ADMIN_PASSWORD"
             printf 'JWT_SECRET=%s\n' "$DEPLOY_JWT_SECRET"
+            if [ -n "$FRONTEND_URL" ]; then
+              printf 'FRONTEND_URL=%s\n' "$FRONTEND_URL"
+            fi
+            if [ -n "$GMAIL_CLIENT_ID" ]; then
+              printf 'GMAIL_CLIENT_ID=%s\n' "$GMAIL_CLIENT_ID"
+            fi
+            if [ -n "$GMAIL_CLIENT_SECRET" ]; then
+              printf 'GMAIL_CLIENT_SECRET=%s\n' "$GMAIL_CLIENT_SECRET"
+            fi
+            if [ -n "$GMAIL_REFRESH_TOKEN" ]; then
+              printf 'GMAIL_REFRESH_TOKEN=%s\n' "$GMAIL_REFRESH_TOKEN"
+            fi
+            if [ -n "$GMAIL_SENDER_EMAIL" ]; then
+              printf 'GMAIL_SENDER_EMAIL=%s\n' "$GMAIL_SENDER_EMAIL"
+            fi
           } > deploy/proxmox/.env
 
       - name: Deploy stack

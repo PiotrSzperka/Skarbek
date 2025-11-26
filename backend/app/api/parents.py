@@ -1,40 +1,60 @@
-from fastapi import APIRouter, HTTPException, Request
-from ..models import Parent, Campaign, Contribution
+import logging
+
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlmodel import select
+
 from ..auth import hash_password, verify_password, create_token, decode_token
 from ..db import get_db
-from sqlmodel import select
-from fastapi import status
+from ..email import GmailEmailClient, gmail_client
+from ..models import Parent, Campaign, Contribution
+from ..utils import generate_readable_password
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+
+def _get_email_client() -> GmailEmailClient:
+    return gmail_client
 
 
 @router.post('/admin/parents')
-def admin_create_parent(payload: dict, request: Request):
-    # simple admin check via header token
-    auth = request.headers.get('authorization')
-    if not auth or not auth.lower().startswith('bearer '):
-        raise HTTPException(status_code=401, detail='missing admin auth')
-    token = auth.split(None, 1)[1]
-    p = decode_token(token)
-    if not p or p.get('sub') != 'admin':
-        raise HTTPException(status_code=401, detail='invalid admin token')
+def admin_create_parent(
+    payload: dict,
+    request: Request,
+    email_client: GmailEmailClient = Depends(_get_email_client),
+):
+    user = getattr(request.state, 'user', None)
+    if user != 'admin':
+        raise HTTPException(status_code=403, detail='admin privileges required')
 
     name = payload.get('name')
     email = payload.get('email')
-    password = payload.get('password')
-    if not email or not password:
-        raise HTTPException(status_code=400, detail='email and password required')
+    if not email:
+        raise HTTPException(status_code=400, detail='email required')
+
+    temporary_password = generate_readable_password(length=10)
 
     with get_db() as session:
         stmt = select(Parent).where(Parent.email == email)
         existing = session.exec(stmt).first()
         if existing:
             raise HTTPException(status_code=400, detail='parent already exists')
-        p = Parent(name=name, email=email, password_hash=hash_password(password), force_password_change=True)
-        session.add(p)
+        parent = Parent(
+            name=name,
+            email=email,
+            password_hash=hash_password(temporary_password),
+            force_password_change=True,
+        )
+        session.add(parent)
+        try:
+            email_client.send_temporary_password_email(email, temporary_password, parent_name=name)
+        except Exception:
+            session.rollback()
+            logger.exception('Nie udało się wysłać tymczasowego hasła do %s', email)
+            raise HTTPException(status_code=500, detail='failed to send temporary password email')
         session.commit()
-        session.refresh(p)
-        return {"id": p.id, "name": p.name, "email": p.email}
+        session.refresh(parent)
+        return {"id": parent.id, "name": parent.name, "email": parent.email}
 
 
 @router.post('/parents/login')
