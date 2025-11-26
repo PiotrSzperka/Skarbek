@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.db import init_db
 from app.models import Campaign
+from tests.helpers import create_parent_and_capture_password
 
 
 @pytest.fixture(autouse=True)
@@ -74,23 +75,15 @@ def test_parent_status_and_mark_paid():
 
 
 # Testy wymuszania zmiany hasła przy pierwszym logowaniu
-def test_parent_force_password_change_on_create():
+def test_parent_force_password_change_on_create(fake_email_client):
     """Test: Nowo utworzony parent ma force_password_change=True"""
     client = TestClient(app)
     
     # login admin
     login = client.post('/api/admin/login', json={'username': 'admin', 'password': 'changeme'})
     token = login.json()['token']
-    headers = {'Authorization': f'Bearer {token}'}
-    
-    # create parent
-    payload = {
-        'name': 'Jan Kowalski',
-        'email': 'jan@test.pl',
-        'password': 'temp123'
-    }
-    r = client.post('/api/admin/parents', json=payload, headers=headers)
-    assert r.status_code == 200
+    _, temporary_password = create_parent_and_capture_password(client, token, fake_email_client, 'jan@test.pl', 'Jan Kowalski')
+    assert temporary_password
     
     # verify in DB
     from app.db import get_db
@@ -101,7 +94,7 @@ def test_parent_force_password_change_on_create():
         assert parent.force_password_change is True
 
 
-def test_parent_login_returns_require_password_change():
+def test_parent_login_returns_require_password_change(fake_email_client):
     """Test: Login zwraca require_password_change=true dla nowego rodzica"""
     client = TestClient(app)
     
@@ -110,22 +103,17 @@ def test_parent_login_returns_require_password_change():
     token = login.json()['token']
     headers = {'Authorization': f'Bearer {token}'}
     
-    payload = {
-        'name': 'Anna Nowak',
-        'email': 'anna@test.pl',
-        'password': 'temp456'
-    }
-    client.post('/api/admin/parents', json=payload, headers=headers)
+    _, temporary_password = create_parent_and_capture_password(client, token, fake_email_client, 'anna@test.pl', 'Anna Nowak')
     
     # parent login
-    r = client.post('/api/parents/login', json={'email': 'anna@test.pl', 'password': 'temp456'})
+    r = client.post('/api/parents/login', json={'email': 'anna@test.pl', 'password': temporary_password})
     assert r.status_code == 200
     data = r.json()
     assert 'token' in data
     assert data['require_password_change'] is True
 
 
-def test_parent_protected_endpoints_blocked_before_password_change():
+def test_parent_protected_endpoints_blocked_before_password_change(fake_email_client):
     """Test: Chronione endpointy zwracają 403 gdy force_password_change=True"""
     client = TestClient(app)
     
@@ -134,14 +122,9 @@ def test_parent_protected_endpoints_blocked_before_password_change():
     token = login.json()['token']
     headers = {'Authorization': f'Bearer {token}'}
     
-    payload = {
-        'name': 'Piotr Test',
-        'email': 'piotr@test.pl',
-        'password': 'temp789'
-    }
-    client.post('/api/admin/parents', json=payload, headers=headers)
+    _, temporary_password = create_parent_and_capture_password(client, token, fake_email_client, 'piotr@test.pl', 'Piotr Test')
     
-    r = client.post('/api/parents/login', json={'email': 'piotr@test.pl', 'password': 'temp789'})
+    r = client.post('/api/parents/login', json={'email': 'piotr@test.pl', 'password': temporary_password})
     parent_token = r.json()['token']
     parent_headers = {'Authorization': f'Bearer {parent_token}'}
     
@@ -159,7 +142,7 @@ def test_parent_protected_endpoints_blocked_before_password_change():
     assert r3.json()['detail']['code'] == 'password_change_required'
 
 
-def test_parent_change_password_initial_success():
+def test_parent_change_password_initial_success(fake_email_client):
     """Test: Endpoint change-password-initial prawidłowo zmienia hasło i czyści flagę"""
     client = TestClient(app)
     
@@ -168,20 +151,15 @@ def test_parent_change_password_initial_success():
     token = login.json()['token']
     headers = {'Authorization': f'Bearer {token}'}
     
-    payload = {
-        'name': 'Maria Test',
-        'email': 'maria@test.pl',
-        'password': 'temp999'
-    }
-    client.post('/api/admin/parents', json=payload, headers=headers)
+    _, temporary_password = create_parent_and_capture_password(client, token, fake_email_client, 'maria@test.pl', 'Maria Test')
     
-    r = client.post('/api/parents/login', json={'email': 'maria@test.pl', 'password': 'temp999'})
+    r = client.post('/api/parents/login', json={'email': 'maria@test.pl', 'password': temporary_password})
     parent_token = r.json()['token']
     parent_headers = {'Authorization': f'Bearer {parent_token}'}
     
     # change password
     change_payload = {
-        'old_password': 'temp999',
+        'old_password': temporary_password,
         'new_password': 'newpass123'
     }
     r2 = client.post('/api/parents/change-password-initial', json=change_payload, headers=parent_headers)
@@ -199,7 +177,7 @@ def test_parent_change_password_initial_success():
         assert parent.password_changed_at is not None
 
 
-def test_parent_change_password_validation():
+def test_parent_change_password_validation(fake_email_client):
     """Test: Walidacja przy zmianie hasła (stare błędne, nowe == stare)"""
     client = TestClient(app)
     
@@ -208,14 +186,9 @@ def test_parent_change_password_validation():
     token = login.json()['token']
     headers = {'Authorization': f'Bearer {token}'}
     
-    payload = {
-        'name': 'Test Validation',
-        'email': 'valid@test.pl',
-        'password': 'temp111'
-    }
-    client.post('/api/admin/parents', json=payload, headers=headers)
+    _, temporary_password = create_parent_and_capture_password(client, token, fake_email_client, 'valid@test.pl', 'Test Validation')
     
-    r = client.post('/api/parents/login', json={'email': 'valid@test.pl', 'password': 'temp111'})
+    r = client.post('/api/parents/login', json={'email': 'valid@test.pl', 'password': temporary_password})
     parent_token = r.json()['token']
     parent_headers = {'Authorization': f'Bearer {parent_token}'}
     
@@ -228,13 +201,13 @@ def test_parent_change_password_validation():
     
     # nowe hasło == stare
     r2 = client.post('/api/parents/change-password-initial', 
-                     json={'old_password': 'temp111', 'new_password': 'temp111'}, 
+                     json={'old_password': temporary_password, 'new_password': temporary_password}, 
                      headers=parent_headers)
     assert r2.status_code == 400
     assert 'different' in r2.json()['detail']
 
 
-def test_parent_login_after_password_change_no_requirement():
+def test_parent_login_after_password_change_no_requirement(fake_email_client):
     """Test: Po zmianie hasła login nie wymaga ponownej zmiany"""
     client = TestClient(app)
     
@@ -243,21 +216,16 @@ def test_parent_login_after_password_change_no_requirement():
     token = login.json()['token']
     headers = {'Authorization': f'Bearer {token}'}
     
-    payload = {
-        'name': 'Final Test',
-        'email': 'final@test.pl',
-        'password': 'temp222'
-    }
-    client.post('/api/admin/parents', json=payload, headers=headers)
+    _, temporary_password = create_parent_and_capture_password(client, token, fake_email_client, 'final@test.pl', 'Final Test')
     
     # first login
-    r1 = client.post('/api/parents/login', json={'email': 'final@test.pl', 'password': 'temp222'})
+    r1 = client.post('/api/parents/login', json={'email': 'final@test.pl', 'password': temporary_password})
     parent_token = r1.json()['token']
     parent_headers = {'Authorization': f'Bearer {parent_token}'}
     
     # change password
     client.post('/api/parents/change-password-initial', 
-                json={'old_password': 'temp222', 'new_password': 'newpass222'}, 
+                json={'old_password': temporary_password, 'new_password': 'newpass222'}, 
                 headers=parent_headers)
     
     # login with new password
@@ -276,7 +244,7 @@ def test_parent_login_after_password_change_no_requirement():
     assert r3.json()['email'] == 'final@test.pl'
 
 
-def test_parent_contributions_access_after_password_change():
+def test_parent_contributions_access_after_password_change(fake_email_client):
     """Test: Po zmianie hasła rodzic ma dostęp do POST /parents/contributions"""
     client = TestClient(app)
     
@@ -290,20 +258,15 @@ def test_parent_contributions_access_after_password_change():
     token = login.json()['token']
     headers = {'Authorization': f'Bearer {token}'}
     
-    payload = {
-        'name': 'Contrib Test',
-        'email': 'contrib@test.pl',
-        'password': 'temp333'
-    }
-    client.post('/api/admin/parents', json=payload, headers=headers)
+    _, temporary_password = create_parent_and_capture_password(client, token, fake_email_client, 'contrib@test.pl', 'Contrib Test')
     
     # login and change password
-    r1 = client.post('/api/parents/login', json={'email': 'contrib@test.pl', 'password': 'temp333'})
+    r1 = client.post('/api/parents/login', json={'email': 'contrib@test.pl', 'password': temporary_password})
     parent_token = r1.json()['token']
     parent_headers = {'Authorization': f'Bearer {parent_token}'}
     
     client.post('/api/parents/change-password-initial', 
-                json={'old_password': 'temp333', 'new_password': 'newpass333'}, 
+                json={'old_password': temporary_password, 'new_password': 'newpass333'}, 
                 headers=parent_headers)
     
     # login with new password
