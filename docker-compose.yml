@@ -15,6 +15,12 @@ services:
       - ADMIN_USER=admin
       - ADMIN_PASSWORD=changeme
       - JWT_SECRET=devsecret
+      - EMAIL_BACKEND=console
+      # To use Gmail API in non-local environments, set these four vars:
+      # - GMAIL_CLIENT_ID=...
+      # - GMAIL_CLIENT_SECRET=...
+      # - GMAIL_REFRESH_TOKEN=...
+      # - GMAIL_SENDER_EMAIL=you@domain
     ports:
       - "8000:8000"
     depends_on:

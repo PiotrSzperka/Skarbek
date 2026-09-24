@@ -14,6 +14,33 @@ GMAIL_API_URL = "https://gmail.googleapis.com/gmail/v1/users/me/messages/send"
 DEFAULT_TOKEN_URI = "https://oauth2.googleapis.com/token"
 DEFAULT_SCOPES = ["https://www.googleapis.com/auth/gmail.send"]
 
+class ConsoleEmailClient:
+    """Development/testing email backend that logs/prints the message."""
+    def __init__(self, sender_email: Optional[str] = None, parent_login_url: Optional[str] = None):
+        self.sender_email = sender_email or os.getenv("GMAIL_SENDER_EMAIL")
+        if parent_login_url:
+            self.parent_login_url = parent_login_url
+        else:
+            env_login = os.getenv("PARENT_LOGIN_URL")
+            if env_login:
+                self.parent_login_url = env_login
+            else:
+                base_url = os.getenv("FRONTEND_URL", "http://localhost:3000").rstrip('/')
+                self.parent_login_url = f"{base_url}/#/parent/login"
+
+    def send_temporary_password_email(self, to_email: str, password: str, parent_name: Optional[str] = None) -> None:
+        subject = "Twoje tymczasowe hasło do portalu Skarbek"
+        body = (
+            f"Cześć {parent_name or 'rodzicu'},\n\n"
+            f"Wygenerowaliśmy dla Ciebie tymczasowe hasło: {password}\n"
+            "Po pierwszym zalogowaniu musisz je zmienić.\n\n"
+            f"Zaloguj się tutaj: {self.parent_login_url}\n\n"
+            "Pozdrawiamy,\nZespół Skarbek"
+        )
+        logger.info("ConsoleEmailClient: would send email to %s\nSubject: %s\n\n%s", to_email, subject, body)
+        # Also print to stdout to make it visible in docker logs
+        print(f"[EMAIL][To: {to_email}] {subject}\n\n{body}")
+
 
 class GmailEmailClient:
     def __init__(
@@ -27,11 +54,11 @@ class GmailEmailClient:
         scopes: Optional[Iterable[str]] = None,
     ):
         self.client_id = client_id or os.getenv("GMAIL_CLIENT_ID")
-        self.client_secret = client_secret or os.getenv("GMAIL_CLIENT_SECRET")
-        self.refresh_token = refresh_token or os.getenv("GMAIL_REFRESH_TOKEN")
-        self.sender_email = sender_email or os.getenv("GMAIL_SENDER_EMAIL")
-        self.parent_login_url: str = self._build_parent_login_url(parent_login_url)
-        self.token_uri = token_uri or os.getenv("GMAIL_TOKEN_URI", DEFAULT_TOKEN_URI)
+    backend_email_backend = os.getenv("EMAIL_BACKEND", "gmail").lower()
+    if backend_email_backend in ("console", "log", "print"):
+        gmail_client = ConsoleEmailClient()
+    else:
+        gmail_client = GmailEmailClient()
         raw_scopes: List[str] = []
         if scopes:
             raw_scopes.extend(scopes)
