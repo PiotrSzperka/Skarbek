@@ -54,11 +54,11 @@ class GmailEmailClient:
         scopes: Optional[Iterable[str]] = None,
     ):
         self.client_id = client_id or os.getenv("GMAIL_CLIENT_ID")
-    backend_email_backend = os.getenv("EMAIL_BACKEND", "gmail").lower()
-    if backend_email_backend in ("console", "log", "print"):
-        gmail_client = ConsoleEmailClient()
-    else:
-        gmail_client = GmailEmailClient()
+        self.client_secret = client_secret or os.getenv("GMAIL_CLIENT_SECRET")
+        self.refresh_token = refresh_token or os.getenv("GMAIL_REFRESH_TOKEN")
+        self.sender_email = sender_email or os.getenv("GMAIL_SENDER_EMAIL")
+        self.parent_login_url: str = self._build_parent_login_url(parent_login_url)
+        self.token_uri = token_uri or os.getenv("GMAIL_TOKEN_URI", DEFAULT_TOKEN_URI)
         raw_scopes: List[str] = []
         if scopes:
             raw_scopes.extend(scopes)
@@ -127,4 +127,8 @@ class GmailEmailClient:
         logger.info("Wysłano wiadomość e-mail do %s", to_email)
 
 
-gmail_client = GmailEmailClient()
+backend_email_backend = os.getenv("EMAIL_BACKEND", "gmail").lower()
+if backend_email_backend in ("console", "log", "print"):
+    gmail_client = ConsoleEmailClient()
+else:
+    gmail_client = GmailEmailClient()
