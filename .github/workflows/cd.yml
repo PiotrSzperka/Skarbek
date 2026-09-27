@@ -13,7 +13,6 @@ jobs:
     name: Deploy via Docker Compose
     runs-on:
       - self-hosted
-      - docker
     environment: production
     steps:
       - name: Validate secrets
