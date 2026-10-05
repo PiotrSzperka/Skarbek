@@ -56,7 +56,7 @@ docker compose up -d
 This starts three services:
 
 - `db` (PostgreSQL 15) with persistent volume `db-data`
-- `backend` (FastAPI) exposed on port `8000`
+- `backend` (FastAPI) exposed on port `8001`
 - `frontend` (Nginx serving the static build) exposed on port `3000`
 
 
@@ -69,7 +69,7 @@ docker compose ps
 ## 5. Access the application
 
 - Frontend UI: `http://<VM-IP>:3000`
-- Backend API (optional direct access): `http://<VM-IP>:8000/docs`
+- Backend API (optional direct access): `http://<VM-IP>:8001/docs`
 - Default admin credentials: `admin` / the password you set in `.env`
 
 ## 6. Managing the stack
@@ -127,7 +127,7 @@ If `PROXMOX_ENV_FILE` is **not** set, the workflow expects these secrets instead
 | `DEPLOY_JWT_SECRET` | Required; JWT signing key |
 | `DEPLOY_BACKEND_IMAGE` | Optional override; defaults to `peterszp/skarbek-backend:latest` |
 | `DEPLOY_FRONTEND_IMAGE` | Optional override; defaults to `peterszp/skarbek-frontend:latest` |
-| `DEPLOY_BACKEND_HOST_PORT` | Optional; defaults to `8000` (host side of backend) |
+| `DEPLOY_BACKEND_HOST_PORT` | Optional; defaults to `8001` (host side of backend) |
 | `DEPLOY_FRONTEND_HOST_PORT` | Optional; defaults to `3000` (host side of frontend) |
 | `DEPLOY_POSTGRES_USER` | Optional; defaults to `skarbek` |
 | `DEPLOY_POSTGRES_DB` | Optional; defaults to `skarbek` |

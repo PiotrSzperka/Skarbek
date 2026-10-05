@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 test('parent forced to change password on first login', async ({ page, request }) => {
-  const apiBase = 'http://localhost:8000'
+  const apiBase = 'http://localhost:8001'
   
   // Listen for console errors
   page.on('console', msg => {
@@ -98,7 +98,7 @@ test('parent forced to change password on first login', async ({ page, request }
 })
 
 test('parent cannot access protected endpoints before password change', async ({ page, request }) => {
-  const apiBase = 'http://localhost:8000'
+  const apiBase = 'http://localhost:8001'
   
   // Create parent with temporary password
   const adminLogin = await request.post(`${apiBase}/api/admin/login`, {
@@ -160,7 +160,7 @@ test('parent cannot access protected endpoints before password change', async ({
 })
 
 test('password change form validates inputs', async ({ page, request }) => {
-  const apiBase = 'http://localhost:8000'
+  const apiBase = 'http://localhost:8001'
   
   // Create parent
   const adminLogin = await request.post(`${apiBase}/api/admin/login`, {

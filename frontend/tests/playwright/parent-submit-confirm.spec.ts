@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 test('parent can cancel or confirm submit contribution', async ({ page, request }) => {
-  const apiBase = 'http://localhost:8000'
+  const apiBase = 'http://localhost:8001'
 
   // create a fresh campaign as admin so parent has no prior contribution for it
   const adminLogin = await request.post(`${apiBase}/api/admin/login`, { data: { username: 'admin', password: 'changeme' } })

@@ -18,7 +18,7 @@ docker-compose up --build
 ```
 
 Po chwili usługi będą dostępne pod:
-- Backend: `http://localhost:8000`
+- Backend: `http://localhost:8001`
 - Frontend: `http://localhost:3000`
 
 2) Backend - uruchomienie lokalne bez Dockera
@@ -32,7 +32,7 @@ pip install -r requirements.txt
 # opcjonalnie uruchom migracje lokalnie
 python run_migrations.py
 # uruchom serwer
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+uvicorn app.main:app --host 0.0.0.0 --port 8001
 ```
 
 Ustaw zmienną środowiskową `DATABASE_URL` gdy chcesz użyć innego DB (np. PostgreSQL):

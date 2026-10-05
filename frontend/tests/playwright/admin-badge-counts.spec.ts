@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 test('badge counts include parents without contribution records', async ({ page, request }) => {
-  const apiBase = 'http://localhost:8000'
+  const apiBase = 'http://localhost:8001'
 
   // admin login
   const login = await request.post(`${apiBase}/api/admin/login`, { data: { username: 'admin', password: 'changeme' } })

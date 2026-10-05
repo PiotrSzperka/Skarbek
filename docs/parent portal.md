@@ -93,7 +93,7 @@ services:
     build: ./backend
     env_file: ./backend/.env
     ports:
-      - "8000:8000"
+      - "8001:8001"
     depends_on:
       - db
   frontend:

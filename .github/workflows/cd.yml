@@ -78,7 +78,7 @@ jobs:
 
           BACKEND_IMAGE="${DEPLOY_BACKEND_IMAGE:-peterszp/skarbek-backend:latest}"
           FRONTEND_IMAGE="${DEPLOY_FRONTEND_IMAGE:-peterszp/skarbek-frontend:latest}"
-          BACKEND_HOST_PORT="${DEPLOY_BACKEND_HOST_PORT:-8000}"
+          BACKEND_HOST_PORT="${DEPLOY_BACKEND_HOST_PORT:-8001}"
           FRONTEND_HOST_PORT="${DEPLOY_FRONTEND_HOST_PORT:-3000}"
           POSTGRES_USER="${DEPLOY_POSTGRES_USER:-skarbek}"
           POSTGRES_DB="${DEPLOY_POSTGRES_DB:-skarbek}"

@@ -9,7 +9,7 @@ docker compose build
 docker compose up
 ```
 
-Backend dostępny: http://localhost:8000
+Backend dostępny: http://localhost:8001
 Frontend dostępny: http://localhost:3000
 
 Testy backendu (lokalnie, bez Dockera):

@@ -124,7 +124,7 @@ ALTER TABLE parent ADD COLUMN created_at timestamp WITH TIME ZONE DEFAULT now();
 1. Admin tworzy rodzica (admin-token z endpointu admin/login):
 
 ```bash
-curl -X POST http://localhost:8000/api/admin/parents \
+curl -X POST http://localhost:8001/api/admin/parents \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <ADMIN_TOKEN>" \
   -d '{"name":"Jan Kowalski","email":"jan@example.com","password":"Temp1234"}'
@@ -133,13 +133,13 @@ curl -X POST http://localhost:8000/api/admin/parents \
 2. Rodzic login:
 
 ```bash
-curl -X POST http://localhost:8000/api/parents/login -H "Content-Type: application/json" -d '{"email":"jan@example.com","password":"Temp1234"}'
+curl -X POST http://localhost:8001/api/parents/login -H "Content-Type: application/json" -d '{"email":"jan@example.com","password":"Temp1234"}'
 ```
 
 3. Rodzic pobiera kampanie:
 
 ```bash
-curl -H "Authorization: Bearer <PARENT_TOKEN>" http://localhost:8000/api/parents/campaigns
+curl -H "Authorization: Bearer <PARENT_TOKEN>" http://localhost:8001/api/parents/campaigns
 ```
 
 ## Edge-cases / decyzje do podjęcia

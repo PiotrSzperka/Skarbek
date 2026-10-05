@@ -1,7 +1,7 @@
 import { test, expect, request } from '@playwright/test';
 
 test('admin e2e smoke (login, create parent, UI hide, create campaign)', async ({ page }) => {
-  const apiBase = process.env.API_URL || 'http://localhost:8000';
+  const apiBase = process.env.API_URL || 'http://localhost:8001';
 
   // login via API
   const req = await request.newContext({ baseURL: apiBase });

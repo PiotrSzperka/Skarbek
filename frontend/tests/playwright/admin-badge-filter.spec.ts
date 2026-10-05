@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 
 test('admin badge shows unpaid count and filter hides campaign when all paid', async ({ page, request }) => {
-  const apiBase = 'http://localhost:8000'
+  const apiBase = 'http://localhost:8001'
 
   // login admin to get token
   const login = await request.post(`${apiBase}/api/admin/login`, { data: { username: 'admin', password: 'changeme' } })

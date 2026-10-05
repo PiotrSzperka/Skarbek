@@ -4,7 +4,7 @@ async function run(){
   const browser = await chromium.launch({ headless: true })
   const page = await browser.newPage()
   const base = process.env.FRONTEND_URL || (process.env.BASE_URL || 'http://localhost:3000')
-  const api = process.env.API_URL || 'http://localhost:8000'
+  const api = process.env.API_URL || 'http://localhost:8001'
   const { request: apiRequestFactory } = require('playwright')
 
   try{

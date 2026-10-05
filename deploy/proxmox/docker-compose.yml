@@ -31,7 +31,7 @@ services:
       GMAIL_REFRESH_TOKEN: ${GMAIL_REFRESH_TOKEN:-}
       GMAIL_SENDER_EMAIL: ${GMAIL_SENDER_EMAIL:-}
     ports:
-      - "${BACKEND_HOST_PORT:-8000}:8000"
+      - "${BACKEND_HOST_PORT:-8001}:8001"
 
   frontend:
     image: ${FRONTEND_IMAGE}
